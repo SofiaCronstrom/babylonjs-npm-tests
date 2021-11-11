@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "ESNext",
+    "module": "esNext",
     "moduleResolution": "node",
     "noResolve": false,
     "noImplicitAny": false,
@@ -12,5 +12,6 @@
         "es6"
     ],
     "rootDir": "src"
+
   }
 }
