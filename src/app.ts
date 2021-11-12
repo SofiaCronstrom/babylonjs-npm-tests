@@ -1,7 +1,7 @@
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
-import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation} from "@babylonjs/core";
+import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior} from "@babylonjs/core";
 
 
 
@@ -99,7 +99,7 @@ const buildGround = () =>{
   const lightSpheres = () => {
 
     const lampLight: SpotLight = new SpotLight('lampLight', Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 1, scene)
-    lampLight.diffuse = new Color3(0.756, 0.568, 0.968);
+    lampLight.diffuse = new Color3(0, 1, 0);
      
 
     const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
@@ -107,61 +107,83 @@ const buildGround = () =>{
     const greenMat: StandardMaterial = new StandardMaterial('greenMat',scene );
     greenMat.emissiveColor = new Color3(0.572, 0.964, 0.596);
 
-    const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 17})
-    bulb.position = new Vector3(-12, 10, 13);
+    const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 13})
+    bulb.position = new Vector3(-12, 30, 13);
     bulb.material = yellowMat;
     
     const bulb2 = bulb.createInstance('lamplight')
-    bulb2.position = new Vector3(-12.000, 10.000, -11.571);
+    bulb2.position = new Vector3(-12.000, 30, -11.571);
     
     const bulb3 = bulb.createInstance('lamplight')
-    bulb3.position = new Vector3(-12.000, 18.271, 0.699);
+    bulb3.position = new Vector3(0.000, 35, 0.699);
 
     
-    lampLight.parent = bulb3;
+    lampLight.parent = bulb;
    
 
     
   
 
   
-   //animation on lampLight
-    const frameRate = 12;
+//    //animation on lampLight
+//     const frameRate = 12;
 
-    const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+//     const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
 
-    const keyFrames = []; 
+//     const keyFrames = []; 
 
-    keyFrames.push({
-        frame: 0,
-        value: 17
-    });
+//     keyFrames.push({
+//         frame: 0,
+//         value: 17
+//     });
 
-    keyFrames.push({
-        frame: frameRate,
-        value: -17
-    });
+//     keyFrames.push({
+//         frame: frameRate,
+//         value: -17
+//     });
 
-    keyFrames.push({
-        frame: 17 * frameRate,
-        value: 17
-    });
+//     keyFrames.push({
+//         frame: 17 * frameRate,
+//         value: 17
+//     });
     
-    xSlide.setKeys(keyFrames);
+//     xSlide.setKeys(keyFrames);
     
-    lampLight.animations.push(xSlide);
+//     lampLight.animations.push(xSlide);
     
 
-    scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
+//     scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
    
 
   }
 
   const createTorus = () => {
 
-    const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.1, radialSegments: 128} )
-    torus.position = new Vector3(-12, 10, 13);
+    const orangeMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
+    orangeMat.emissiveColor = new Color3(0.274, 0.850, 0.945);
+
+    const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.3, radialSegments: 150, p:5, q:2, radius: 10} )
+    torus.position = new Vector3(0, 13, -30);
+    torus.material = orangeMat;
+
+    //drag behavior on torus knot in the z-axis
+    const pointerDragBeh = new PointerDragBehavior({dragAxis: new Vector3(0,0,1)});
+
+       // Listen to drag events
+       pointerDragBeh.onDragStartObservable.add((event)=>{
+        console.log("dragStart");
+        console.log(event);
+    })
+    pointerDragBeh.onDragObservable.add((event)=>{
+        console.log("drag");
+        console.log(event);
+    })
+    pointerDragBeh.onDragEndObservable.add((event)=>{
+        console.log("dragEnd");
+        console.log(event);
+    })
     
+    torus.addBehavior(pointerDragBeh)
     return torus;
   }
 
