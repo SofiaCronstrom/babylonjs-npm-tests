@@ -26,12 +26,12 @@ const createScene = () => {
     
 //   const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 70, Math.PI / 2.5, 36, Vector3.Zero(), scene);
 //    camera.attachControl(canvas, true);
-const camera: FreeCamera = new FreeCamera("camera1", new Vector3(40, 9, 0), scene);
+const camera: FreeCamera = new FreeCamera("camera1", new Vector3(80, 9, -30), scene);
 camera.setTarget(Vector3.Zero());
 camera.attachControl(canvas, true);
 
   const light1: HemisphericLight = new HemisphericLight("light1", new Vector3(1, 1, 0), scene);
-  light1.intensity = 0.2
+  light1.intensity = 0.5
   
 }          
      
@@ -48,8 +48,8 @@ camera.attachControl(canvas, true);
 
      const places = []; //each entry is an array [house type, rotation, x, z]
      places.push([1, -Math.PI / 1, -0, 17.38]);
-     //places.push([1, -200, 9, -2]);
-     //places.push([1, 300, 0.75, 6 ]);
+     places.push([1,-Math.PI / 1.5 ,-9 , -32.5]);
+     places.push([1,Math.PI / 1.5 ,-9 , 32.5]);
      //places.push([1, 140, 4.5, 6 ]);
  
          //Create instances from the first two that were built 
@@ -72,7 +72,7 @@ camera.attachControl(canvas, true);
 const buildGround = () =>{
     
  //ground
-    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 35, height: 35})
+    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 35, height: 95})
 
     //texture
     const groundMat: StandardMaterial = new StandardMaterial('groundMat', scene);
@@ -104,6 +104,8 @@ const buildGround = () =>{
 
     const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
     yellowMat.emissiveColor = new Color3(0.756, 0.568, 0.968);
+    const greenMat: StandardMaterial = new StandardMaterial('greenMat',scene );
+    greenMat.emissiveColor = new Color3(0.572, 0.964, 0.596);
 
     const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 17})
     bulb.position = new Vector3(-12, 10, 13);
@@ -123,7 +125,7 @@ const buildGround = () =>{
   
 
   
-   
+   //animation on lampLight
     const frameRate = 12;
 
     const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
@@ -144,15 +146,26 @@ const buildGround = () =>{
         frame: 17 * frameRate,
         value: 17
     });
-
+    
     xSlide.setKeys(keyFrames);
-
+    
     lampLight.animations.push(xSlide);
+    
 
     scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
+   
+
   }
 
+  const createTorus = () => {
 
+    const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.1, radialSegments: 128} )
+    torus.position = new Vector3(-12, 10, 13);
+    
+    return torus;
+  }
+
+createTorus();
 lightSpheres();
 buildTown();   
 buildGround();
