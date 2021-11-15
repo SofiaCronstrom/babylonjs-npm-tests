@@ -1,7 +1,8 @@
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
-import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior} from "@babylonjs/core";
+import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior, ActionManager, InterpolateValueAction} from "@babylonjs/core";
+
 
 
 
@@ -24,11 +25,11 @@ const engine = new Engine(canvas, true);
 
 const createScene = () => {
     
-//   const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 70, Math.PI / 2.5, 36, Vector3.Zero(), scene);
-//    camera.attachControl(canvas, true);
-const camera: FreeCamera = new FreeCamera("camera1", new Vector3(80, 9, -30), scene);
-camera.setTarget(Vector3.Zero());
-camera.attachControl(canvas, true);
+  const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 100, Math.PI / 2.5, 120, Vector3.Zero(), scene);
+   camera.attachControl(canvas, true);
+// const camera: FreeCamera = new FreeCamera("camera1", new Vector3(80, 9, -30), scene);
+// camera.setTarget(Vector3.Zero());
+// camera.attachControl(canvas, true);
 
   const light1: HemisphericLight = new HemisphericLight("light1", new Vector3(1, 1, 0), scene);
   light1.intensity = 0.5
@@ -50,6 +51,9 @@ camera.attachControl(canvas, true);
      places.push([1, -Math.PI / 1, -0, 17.38]);
      places.push([1,-Math.PI / 1.5 ,-9 , -32.5]);
      places.push([1,Math.PI / 1.5 ,-9 , 32.5]);
+     places.push([1, -Math.PI / 1, 58, 0]);
+     places.push([1,-Math.PI / 1.5 ,48 , -40]);
+     places.push([1,Math.PI / 1.5 ,48 , 40]);
      //places.push([1, 140, 4.5, 6 ]);
  
          //Create instances from the first two that were built 
@@ -72,13 +76,14 @@ camera.attachControl(canvas, true);
 const buildGround = () =>{
     
  //ground
-    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 35, height: 95})
+    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 95, height: 111})
 
     //texture
     const groundMat: StandardMaterial = new StandardMaterial('groundMat', scene);
     groundMat.diffuseColor = new Color3(0.968, 0.741, 0.568);
+    ground.position = new Vector3(30,0,0);
     ground.material = groundMat;
-
+    
     return ground;
   }
   
@@ -91,14 +96,14 @@ const buildGround = () =>{
      
      //material
      const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
-     boxMat.diffuseColor = new Color3(0.941, 0.796, 0.737);
+     boxMat.diffuseColor = new Color3(0.941, 0.839, 0.839);
      box.material = boxMat;
 
      return box;
   }
   const lightSpheres = () => {
 
-    const lampLight: SpotLight = new SpotLight('lampLight', Vector3.Zero(), new Vector3(0, -1, 0), Math.PI, 1, scene)
+    const lampLight: SpotLight = new SpotLight('lampLight', Vector3.Zero(), new Vector3(0, -10, 0), Math.PI, 1, scene)
     lampLight.diffuse = new Color3(0, 1, 0);
      
 
@@ -108,15 +113,15 @@ const buildGround = () =>{
     greenMat.emissiveColor = new Color3(0.572, 0.964, 0.596);
 
     const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 13})
-    bulb.position = new Vector3(-12, 30, 13);
+    bulb.position = new Vector3(0.000, 35, 0.699);
     bulb.material = yellowMat;
     
-    const bulb2 = bulb.createInstance('lamplight')
-    bulb2.position = new Vector3(-12.000, 30, -11.571);
+    const bulb2 = bulb.clone('lamplight')
+    bulb2.position = new Vector3(-12, 30, 13);
     
     const bulb3 = bulb.createInstance('lamplight')
-    bulb3.position = new Vector3(0.000, 35, 0.699);
-
+    bulb3.position = new Vector3(-12.000, 30, -11.571);
+    
     
     lampLight.parent = bulb;
    
@@ -125,34 +130,34 @@ const buildGround = () =>{
   
 
   
-//    //animation on lampLight
-//     const frameRate = 12;
+   //animation on lampLight
+    const frameRate = 12;
 
-//     const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+    const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
 
-//     const keyFrames = []; 
+    const keyFrames = []; 
 
-//     keyFrames.push({
-//         frame: 0,
-//         value: 17
-//     });
+    keyFrames.push({
+        frame: 0,
+        value: 17
+    });
 
-//     keyFrames.push({
-//         frame: frameRate,
-//         value: -17
-//     });
+    keyFrames.push({
+        frame: frameRate,
+        value: -17
+    });
 
-//     keyFrames.push({
-//         frame: 17 * frameRate,
-//         value: 17
-//     });
+    keyFrames.push({
+        frame: 17 * frameRate,
+        value: 17
+    });
     
-//     xSlide.setKeys(keyFrames);
+    xSlide.setKeys(keyFrames);
     
-//     lampLight.animations.push(xSlide);
+    lampLight.animations.push(xSlide);
     
 
-//     scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
+    scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
    
 
   }
@@ -187,13 +192,47 @@ const buildGround = () =>{
     return torus;
   }
 
+  const createCapsule = () =>{
+    //emissive color
+    const capMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
+    capMaterial.emissiveColor = new Color3(1, 0.549, 0.121)
+
+    const capsule: Mesh = MeshBuilder.CreateCapsule('capsule', {radius:1, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17});
+    capsule.position = new Vector3(5, 9, 30)
+    capsule.material = capMaterial;
+    //putting action on capsule
+    //fading visibility on click
+    capsule.actionManager = new ActionManager(scene);
+
+    capsule.actionManager.registerAction(
+        new InterpolateValueAction(
+            ActionManager.OnPickTrigger,
+            capsule,
+            "visibility",
+            0.1,
+            1000
+            )
+        )
+        .then(new InterpolateValueAction(
+            ActionManager.OnPickTrigger,
+            capsule,
+            "visibility",
+            1.0,
+            1000
+            )
+        );
+    
+    return capsule;
+  }
+
 createTorus();
 lightSpheres();
 buildTown();   
 buildGround();
 buildBox();
 createScene();
-//buildTown();     
+createCapsule();
+
         
 
         // run the main render loop
