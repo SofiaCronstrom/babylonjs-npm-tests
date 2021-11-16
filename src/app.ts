@@ -1,7 +1,8 @@
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
-import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior, ActionManager, InterpolateValueAction} from "@babylonjs/core";
+import "babylonjs-gui";
+import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior, ActionManager, InterpolateValueAction, PositionGizmo, PointLight, ShadowGenerator} from "@babylonjs/core";
 
 
 
@@ -21,7 +22,7 @@ const engine = new Engine(canvas, true);
   const scene = new Scene(engine);
   scene.clearColor = new Color4(0.1, 0, 0.1);     
   
-
+const manager = new BABYLON.GUI.GUI3DManager(scene);
 
 const createScene = () => {
     
@@ -32,7 +33,9 @@ const createScene = () => {
 // camera.attachControl(canvas, true);
 
   const light1: HemisphericLight = new HemisphericLight("light1", new Vector3(1, 1, 0), scene);
-  light1.intensity = 0.5
+  light1.intensity = 0.1
+
+  return light1;
   
 }          
      
@@ -74,6 +77,8 @@ const createScene = () => {
 
 
 const buildGround = () =>{
+  
+    
     
  //ground
     const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 95, height: 111})
@@ -84,6 +89,7 @@ const buildGround = () =>{
     ground.position = new Vector3(30,0,0);
     ground.material = groundMat;
     
+
     return ground;
   }
   
@@ -102,9 +108,12 @@ const buildGround = () =>{
      return box;
   }
   const lightSpheres = () => {
+    
+    const ground = buildGround();
+
 
     const lampLight: SpotLight = new SpotLight('lampLight', Vector3.Zero(), new Vector3(0, -10, 0), Math.PI, 1, scene)
-    lampLight.diffuse = new Color3(0, 1, 0);
+    lampLight.diffuse = new Color3(1, 0.078, 0.776);
      
 
     const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
@@ -125,40 +134,44 @@ const buildGround = () =>{
     
     lampLight.parent = bulb;
    
+    const shadow = new ShadowGenerator(1024, lampLight);
+  shadow.getShadowMap().renderList.push(bulb);
+  ground.receiveShadows = true;
 
     
   
 
   
    //animation on lampLight
-    const frameRate = 12;
+    // const frameRate = 12;
 
-    const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
+    // const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
 
-    const keyFrames = []; 
+    // const keyFrames = []; 
 
-    keyFrames.push({
-        frame: 0,
-        value: 17
-    });
+    // keyFrames.push({
+    //     frame: 0,
+    //     value: 17
+    // });
 
-    keyFrames.push({
-        frame: frameRate,
-        value: -17
-    });
+    // keyFrames.push({
+    //     frame: frameRate,
+    //     value: -17
+    // });
 
-    keyFrames.push({
-        frame: 17 * frameRate,
-        value: 17
-    });
+    // keyFrames.push({
+    //     frame: 17 * frameRate,
+    //     value: 17
+    // });
     
-    xSlide.setKeys(keyFrames);
+    // xSlide.setKeys(keyFrames);
     
-    lampLight.animations.push(xSlide);
+    // lampLight.animations.push(xSlide);
     
 
-    scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
-   
+    // scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
+  
+    return bulb;
 
   }
 
@@ -200,6 +213,8 @@ const buildGround = () =>{
     const capsule: Mesh = MeshBuilder.CreateCapsule('capsule', {radius:1, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17});
     capsule.position = new Vector3(5, 9, 30)
     capsule.material = capMaterial;
+
+
     //putting action on capsule
     //fading visibility on click
     capsule.actionManager = new ActionManager(scene);
@@ -225,6 +240,37 @@ const buildGround = () =>{
     return capsule;
   }
 
+  const createCylinder = () => {
+   
+    
+    
+
+    const light1 = new PointLight("light", new Vector3(280, -100, -0), scene);
+	light1.diffuse = new Color3(1, 0, 0);
+	light1.specular = new Color3(0, 1, 0);
+
+    
+    const cylMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
+    cylMaterial.emissiveColor = new Color3(0.176, 0.745, 0.572);
+
+  const cylinder: Mesh = MeshBuilder.CreateCylinder("cylinder", {tessellation: 3, diameter: 10, height: 5}) 
+  cylinder.position = new Vector3(50 ,5 , 40);
+  cylinder.material = cylMaterial;
+
+  
+
+  const cyl2 = cylinder.createInstance('cylinder');
+  cyl2.position = new Vector3(50 ,15 , 40);
+
+  const cyl3 = cylinder.createInstance('cylinder');
+  cyl3.position = new Vector3(50 ,25 , 40);
+
+  return cylinder;
+  
+  } 
+
+
+
 createTorus();
 lightSpheres();
 buildTown();   
@@ -232,7 +278,7 @@ buildGround();
 buildBox();
 createScene();
 createCapsule();
-
+createCylinder();
         
 
         // run the main render loop
