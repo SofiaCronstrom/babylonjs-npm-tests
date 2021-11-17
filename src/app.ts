@@ -20,7 +20,7 @@ document.body.appendChild(canvas);
 const engine = new Engine(canvas, true);
   // create the canvas html element and attach it to the webpage
   const scene = new Scene(engine);
-  scene.clearColor = new Color4(0.1, 0, 0.1);     
+  scene.clearColor = new Color4(0.039, 0.003, 0.058);     
   
 
 
@@ -28,7 +28,7 @@ const createScene = () => {
     
   // const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 100, Math.PI / 2.5, 120, Vector3.Zero(), scene);
   //  camera.attachControl(canvas, true);
-const camera: FreeCamera = new FreeCamera("camera1", new Vector3(80, 9, -30), scene);
+const camera: FreeCamera = new FreeCamera("camera1", new Vector3(150, 20, -70), scene);
 camera.setTarget(Vector3.Zero());
 camera.attachControl(canvas, true);
 
@@ -72,43 +72,58 @@ camera.attachControl(canvas, true);
              houses[i].rotation.y = places[i][1];
              houses[i].position.x = places[i][2];
              houses[i].position.z = places[i][3];
-             console.log(places[i][3])
          }
 }
+ const buildCapsule = () =>{
+   
+  const boxCopy = buildGround().box;
+  boxCopy.position = new Vector3(4, 14, 2);
 
+  const places = [];
+  places.push([new Vector3(-1, 18, -2)]);
+  places.push([new Vector3(2.7, 22, 2)]);
+  places.push([new Vector3(4.7, 26, -2)]);
+
+  const boxes = [];
+  for (let i = 0; i <places.length; i++){
+   boxes[i] = boxCopy.createInstance('boxCopy' + i);
+
+   boxes[i].position = places[i][0];
+   console.log(boxes[i])
+  }
+ }
 
 const buildGround = () =>{
   
-    
-    
- //ground
+    //ground
     const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 95, height: 111})
 
     //texture
     const groundMat: StandardMaterial = new StandardMaterial('groundMat', scene);
-    groundMat.diffuseColor = new Color3(0.968, 0.741, 0.568);
+    groundMat.diffuseColor = new Color3(0.807, 0.568, 0.933);
     ground.position = new Vector3(30,0,0);
     ground.material = groundMat;
 
     const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
-    boxMat.diffuseColor = new Color3(0.756, 0.568, 0.968);
+    boxMat.emissiveColor = new Color3(0.807, 0.568, 0.933);
     
+    //Mesh
     const lampLight = new SpotLight("spotLight", new Vector3(0, 30, -10), new Vector3(0, -1, 0), Math.PI / 3, 2, scene);
     lampLight.diffuse = new Color3(0.187, 0.129, 0.129);
     lampLight.position = new Vector3(0, 70,0);
 
-    const box: Mesh = MeshBuilder.CreateCapsule('box', {radius:5, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17})
+    const box: Mesh = MeshBuilder.CreateCapsule('box', {radius:2, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17})
     box.position = new Vector3(-2.7, 9, 0);
     box.rotation = new Vector3(133.3, 0, 0)
     box.material = boxMat;
     
-  
+    //Shadow on mesh
     const shadowGenerator00 = new ShadowGenerator(1024, lampLight);
     shadowGenerator00.getShadowMap().renderList.push(box);
     
     ground.receiveShadows = true;
 
-    return ground;
+    return {ground, box};
   }
   
   const buildBox = () => {
@@ -120,19 +135,13 @@ const buildGround = () =>{
      
      //material
      const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
-     boxMat.diffuseColor = new Color3(0.941, 0.839, 0.839);
+     boxMat.diffuseColor = new Color3(0.807, 0.568, 0.933);
      box.material = boxMat;
 
      return box;
   }
   const lightSpheres = () => {
     
-    
-    
-
-   
-
-   
     const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
     yellowMat.emissiveColor = new Color3(0.756, 0.568, 0.968);
     const greenMat: StandardMaterial = new StandardMaterial('greenMat',scene );
@@ -142,13 +151,6 @@ const buildGround = () =>{
     bulb.position = new Vector3(0, 50, 0);
     bulb.material = yellowMat;
     
-    const bulb2 = bulb.clone('lamplight')
-    bulb2.position = new Vector3(-12, 30, 13);
-    bulb2.parent = bulb;
-
-    const bulb3 = bulb.createInstance('lamplight')
-    bulb3.position = new Vector3(-12.000, 30, -11.571);
-    bulb3.parent = bulb;
 
    
    
@@ -190,7 +192,7 @@ const buildGround = () =>{
   const createTorus = () => {
 
     const orangeMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
-    orangeMat.emissiveColor = new Color3(0.274, 0.850, 0.945);
+    orangeMat.emissiveColor = new Color3(0.807, 0.568, 0.933);
 
     const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.3, radialSegments: 150, p:5, q:2, radius: 10} )
     torus.position = new Vector3(0, 13, -30);
@@ -209,8 +211,7 @@ const buildGround = () =>{
         console.log(event);
     })
     pointerDragBeh.onDragEndObservable.add((event)=>{
-        console.log("dragEnd");
-        console.log(event);
+        
     })
     
     torus.addBehavior(pointerDragBeh)
@@ -223,7 +224,7 @@ const buildGround = () =>{
     const ground = buildBox();
     //emissive color
     const capMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
-    capMaterial.emissiveColor = new Color3(1, 0.549, 0.121)
+    capMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933)
 
     const capsule: Mesh = MeshBuilder.CreateCapsule('capsule', {radius:1, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17});
     capsule.position = new Vector3(5, 9, 30)
@@ -258,7 +259,7 @@ const buildGround = () =>{
   const createCylinder = () => {
 
     const cylMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
-    cylMaterial.emissiveColor = new Color3(0.176, 0.745, 0.572);
+    cylMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933);
 
   const cylinder: Mesh = MeshBuilder.CreateCylinder("cylinder", {tessellation: 3, diameter: 10, height: 5}) 
   cylinder.position = new Vector3(50 ,5 , 40);
@@ -277,7 +278,7 @@ const buildGround = () =>{
   } 
 
 
-
+buildCapsule();
 createTorus();
 lightSpheres();
 buildTown();   
