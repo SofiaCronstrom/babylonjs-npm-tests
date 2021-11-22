@@ -1,8 +1,10 @@
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
+import * as GUI from "@babylonjs/gui";
 import { Engine, Scene, ArcRotateCamera, Vector3, HemisphericLight, Mesh, MeshBuilder, Material, StandardMaterial, Color3, Color4, SpotLight, WebXRExperienceHelper, FreeCamera, Animation, PointerDragBehavior, ActionManager, InterpolateValueAction, PositionGizmo, PointLight, ShadowGenerator, DirectionalLight} from "@babylonjs/core";
 import { standardPixelShader } from "@babylonjs/core/Shaders/standard.fragment";
+
 
 
 
@@ -20,21 +22,21 @@ document.body.appendChild(canvas);
 const engine = new Engine(canvas, true);
   // create the canvas html element and attach it to the webpage
   const scene = new Scene(engine);
-  scene.clearColor = new Color4(0.039, 0.003, 0.058);     
+  scene.clearColor = new Color4(0, 0, 0);     
   
 
 
 const createScene = () => {
     
-  // const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 100, Math.PI / 2.5, 120, Vector3.Zero(), scene);
+  // const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI / 120, Math.PI / 2.3, 100, Vector3.Zero(), scene);
   //  camera.attachControl(canvas, true);
 const camera: FreeCamera = new FreeCamera("camera1", new Vector3(150, 20, -70), scene);
 camera.setTarget(Vector3.Zero());
 camera.attachControl(canvas, true);
 
-// var light1 = new DirectionalLight("dir01", new Vector3(-1, -2, -1), scene);
-// light1.position = new Vector3(20, 40, 20);
-// light1.intensity = 0.5;
+const light = new SpotLight("spotLight", new Vector3(0, 30, -10), new Vector3(0, -1, 0), Math.PI / 3, 2, scene);
+light.diffuse = new Color3(1, 0.945, 0.058);
+light.position = new Vector3(0, 100,0);
 
   return camera;
   
@@ -45,20 +47,20 @@ camera.attachControl(canvas, true);
          
      const detached_house = buildBox();
      detached_house.rotation.y = -Math.PI / 2;
-     detached_house.position.x = -17.6;
+     detached_house.position.x = -45;
      detached_house.position.z = 0;
          
              
      
 
      const places = []; //each entry is an array [house type, rotation, x, z]
-     places.push([1, -Math.PI / 1, -0, 17.38]);
-     places.push([1,-Math.PI / 1.5 ,-9 , -32.5]);
-     places.push([1,Math.PI / 1.5 ,-9 , 32.5]);
-     places.push([1, -Math.PI / 1, 58, 0]);
-     places.push([1,-Math.PI / 1.5 ,48 , -40]);
-     places.push([1,Math.PI / 1.5 ,48 , 40]);
-     //places.push([1, 140, 4.5, 6 ]);
+     places.push([1, -Math.PI / 1, 87, 65.65]);
+     places.push([1,-Math.PI / 1.5 ,-36 , -32.5]);
+     places.push([1,Math.PI / 1.5 ,-36 , 32.5]);
+     places.push([1, -Math.PI / 1, 87, 60.65]);
+     places.push([1,-Math.PI / 1 ,87 , -55.43]);
+     places.push([1,Math.PI / 1 ,87, 55.5]);
+     places.push([1, Math.PI/1, 87, -65.65 ]);
  
          //Create instances from the first two that were built 
      const houses = [];
@@ -75,131 +77,70 @@ camera.attachControl(canvas, true);
          }
 }
  const buildCapsule = () =>{
-   
+  
+  const ground = buildGround().ground;
   const boxCopy = buildGround().box;
-  boxCopy.position = new Vector3(4, 14, 2);
+  
+
+  boxCopy.position = new Vector3(4, 14, 3);
 
   const places = [];
-  places.push([new Vector3(-1, 18, -2)]);
-  places.push([new Vector3(2.7, 22, 2)]);
-  places.push([new Vector3(4.7, 26, -2)]);
+  places.push([new Vector3(-1, 20, 28)]);
+  places.push([new Vector3(-4.7, 30, 26)]);
+  places.push([new Vector3(4.7, 32, 20)]);
+  places.push([new Vector3(-1, 20, 15)]);
+  places.push([new Vector3(-4.7, 30, 11)]);
+  places.push([new Vector3(4.7, 32, 4)]);
 
   const boxes = [];
   for (let i = 0; i <places.length; i++){
    boxes[i] = boxCopy.createInstance('boxCopy' + i);
 
    boxes[i].position = places[i][0];
-   console.log(boxes[i])
+   
   }
+
+  
  }
+
+
 
 const buildGround = () =>{
   
     //ground
-    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 95, height: 111})
-
+    const ground: Mesh =  MeshBuilder.CreateGround('ground', {width: 150, height: 111})
+    
     //texture
     const groundMat: StandardMaterial = new StandardMaterial('groundMat', scene);
     groundMat.diffuseColor = new Color3(0.807, 0.568, 0.933);
     ground.position = new Vector3(30,0,0);
     ground.material = groundMat;
-
-    const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
-    boxMat.emissiveColor = new Color3(0.807, 0.568, 0.933);
     
-    //Mesh
-    const lampLight = new SpotLight("spotLight", new Vector3(0, 30, -10), new Vector3(0, -1, 0), Math.PI / 3, 2, scene);
-    lampLight.diffuse = new Color3(0.187, 0.129, 0.129);
-    lampLight.position = new Vector3(0, 70,0);
-
-    const box: Mesh = MeshBuilder.CreateCapsule('box', {radius:2, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17})
-    box.position = new Vector3(-2.7, 9, 0);
-    box.rotation = new Vector3(133.3, 0, 0)
-    box.material = boxMat;
-    
-    //Shadow on mesh
-    const shadowGenerator00 = new ShadowGenerator(1024, lampLight);
-    shadowGenerator00.getShadowMap().renderList.push(box);
-    
-    ground.receiveShadows = true;
-
-    return {ground, box};
-  }
-  
-  const buildBox = () => {
-    
-     //box mesh
-     const box: Mesh = MeshBuilder.CreateBox('box', {height: 35, width: 35, depth: 0.25});
-     box.position = new Vector3(0, 17.5, -17.38);
-     box.rotation.y = 0;
-     
-     //material
-     const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
-     boxMat.diffuseColor = new Color3(0.807, 0.568, 0.933);
-     box.material = boxMat;
-
-     return box;
-  }
-  const lightSpheres = () => {
-    
-    const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
-    yellowMat.emissiveColor = new Color3(0.756, 0.568, 0.968);
-    const greenMat: StandardMaterial = new StandardMaterial('greenMat',scene );
-    greenMat.emissiveColor = new Color3(0.572, 0.964, 0.596);
-
-    const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 13})
-    bulb.position = new Vector3(0, 50, 0);
-    bulb.material = yellowMat;
-    
-
-   
-   
-  
-    
-    //animation on lampLight
-    // const frameRate = 12;
-
-    // const xSlide: Animation = new Animation("xSlide", "position.y", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    // const keyFrames = []; 
-
-    // keyFrames.push({
-    //     frame: 0,
-    //     value: 17
-    // });
-
-    // keyFrames.push({
-    //     frame: frameRate,
-    //     value: -17
-    // });
-
-    // keyFrames.push({
-    //     frame: 17 * frameRate,
-    //     value: 17
-    // });
-    
-    // xSlide.setKeys(keyFrames);
-    
-    // lampLight.animations.push(xSlide);
-    
-
-    // scene.beginAnimation(lampLight, 0, 17 * frameRate, true);
-  
-    return bulb;
-
-  }
-
-  const createTorus = () => {
 
     const orangeMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
     orangeMat.emissiveColor = new Color3(0.807, 0.568, 0.933);
+    
+    const greenMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
+    greenMat.emissiveColor = new Color3(1, 0.968, 0.058);
+    greenMat.alpha = 0.5
+    const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
+    boxMat.emissiveColor = new Color3(0.807, 0.568, 0.933);
+    
+    
 
-    const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.3, radialSegments: 150, p:5, q:2, radius: 10} )
-    torus.position = new Vector3(0, 13, -30);
+    //Mesh
+    const box: Mesh = MeshBuilder.CreateCapsule('box', {radius:2, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17})
+    box.position = new Vector3(-2.7, 9, 0);
+    box.rotation = new Vector3(133.3, 11, 0)
+    box.material = greenMat;
+
+    const torus: Mesh = MeshBuilder.CreateTorusKnot('torus',{tube: 0.3, radialSegments: 170, p:8, q:5, radius: 15} )
+    torus.position = new Vector3(0, 22, -1.3);
+    torus.rotation = new Vector3(0, 11, 0)
     torus.material = orangeMat;
-
-    //drag behavior on torus knot in the z-axis
-    const pointerDragBeh = new PointerDragBehavior({dragAxis: new Vector3(0,0,1)});
+    
+       //drag behavior on torus knot in the z-axis
+       const pointerDragBeh = new PointerDragBehavior({dragAxis: new Vector3(0,0,1)});
 
        // Listen to drag events
        pointerDragBeh.onDragStartObservable.add((event)=>{
@@ -215,26 +156,34 @@ const buildGround = () =>{
     })
     
     torus.addBehavior(pointerDragBeh)
-    return torus;
+
+   
+
+    return {ground, box};
+
+
+
   }
-
   const createCapsule = () =>{
+    
 
-    const lampLight = createScene();
-    const ground = buildBox();
+
+    const light = new SpotLight("potLight", new Vector3(0, 30, -10), new Vector3(0, -1, 0), Math.PI / 3, 2, scene);
+    light.diffuse = new Color3(0.729, 0.058, 1);
+    light.position = new Vector3(90, 90, 41);
+  
     //emissive color
     const capMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
     capMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933)
-
+  
     const capsule: Mesh = MeshBuilder.CreateCapsule('capsule', {radius:1, capSubdivisions: 6, subdivisions:6, tessellation:36, height:17});
-    capsule.position = new Vector3(5, 9, 30)
+    capsule.position = new Vector3(90 ,10 , -40)
     capsule.material = capMaterial;
     
-   
     //putting action on capsule
     //fading visibility on click
     capsule.actionManager = new ActionManager(scene);
-
+  
     capsule.actionManager.registerAction(
         new InterpolateValueAction(
             ActionManager.OnPickTrigger,
@@ -252,34 +201,127 @@ const buildGround = () =>{
             1000
             )
         );
-    
-    return capsule;
+        
   }
+  
+  const buildBox = () => {
+    
+     //box mesh
+     const box: Mesh = MeshBuilder.CreateBox('box', {height: 35, width: 35, depth: 0.25});
+     box.position = new Vector3(87, 17.41, -60.65);
+     box.rotation.y = 0;
+     
+     //material
+     const boxMat: StandardMaterial = new StandardMaterial('boxMat', scene);
+     boxMat.diffuseColor = new Color3(0.807, 0.568, 0.933);
+     box.material = boxMat;
+
+     return box;
+  }
+  const lightSpheres = () => {
+    
+    const yellowMat: StandardMaterial = new StandardMaterial("yellowMat", scene);
+    yellowMat.emissiveColor = new Color3(0.917, 0.792, 0.968);
+    
+
+    const bulb: Mesh = MeshBuilder.CreateSphere('bulb', {diameter: 13})
+    bulb.position = new Vector3(0, 70, 0);
+    bulb.material = yellowMat;
+    
+    return bulb;
+
+  }
+
+
 
   const createCylinder = () => {
 
-    const cylMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
-    cylMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933);
+    const light = new SpotLight("otLight", new Vector3(0, 30, -10), new Vector3(0, -1, 0), Math.PI / 3, 2, scene);
+    light.diffuse = new Color3(1, 0.568, 0.058);
+    light.position = new Vector3(90, 90, -41);
+   
+  const manager = new GUI.GUI3DManager(scene);
+
+
+  const cylMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
+  cylMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933);
+
+  const greenMat: StandardMaterial = new StandardMaterial('greenMat',scene );
+  greenMat.emissiveColor = new Color3(0.572, 0.964, 0.596);
 
   const cylinder: Mesh = MeshBuilder.CreateCylinder("cylinder", {tessellation: 3, diameter: 10, height: 5}) 
-  cylinder.position = new Vector3(50 ,5 , 40);
+  cylinder.position = new Vector3(90 ,5 , 40);
   cylinder.material = cylMaterial;
+
+  const cyl2 = cylinder.createInstance('cylinder');
+  cyl2.position = new Vector3(90 ,15 , 40);
+
+  const cyl3 = cylinder.createInstance('cylinder');
+  cyl3.position = new Vector3(90 ,25 , 40);
+  const cyls = [];
+  cyls.push([cylinder, cyl2, cyl3]);
+  
+  // const panel = new GUI.CylinderPanel();
+  //   panel.margin = 0.75;
+ 
+  //   manager.addControl(panel);
+  //   panel.linkToTransformNode(anchor);
+  //   panel.position.z = -1.5;
+  const button = new GUI.MeshButton3D(cylinder, "button");
+ 
+  manager.addControl(button);
+  button.pointerDownAnimation = () => {
+    cylinder.material = greenMat;
+  };
+  button.pointerUpAnimation = () => {
+    cylinder.material = cylMaterial;
+  };
+  // button.pointerOutAnimation = () => {
+  //   //cylinder.material = new Color3(0.5, 0.19, 0);
+  // };
 
   
 
-  const cyl2 = cylinder.createInstance('cylinder');
-  cyl2.position = new Vector3(50 ,15 , 40);
-
-  const cyl3 = cylinder.createInstance('cylinder');
-  cyl3.position = new Vector3(50 ,25 , 40);
-
-  return {cylinder};
+  console.log(button)
   
   } 
 
+  // const guiButton = () => {
 
+  //   const manager = new GUI.GUI3DManager(scene);
+
+  //   const panel = new GUI.StackPanel3D();
+  //   panel.margin = 0.05;
+
+  //   manager.addControl(panel);
+  //   panel.position = new Vector3(90 ,5 , 20);
+  //   panel.scaling = new Vector3(5, 5, 5)
+  //   const addButton = function () {
+
+  //   const cylMaterial: StandardMaterial = new StandardMaterial('capMat', scene);
+  //   cylMaterial.emissiveColor = new Color3(0.807, 0.568, 0.933);
+
+  //   const button = new GUI.Button3D("orientation");
+    
+  //   panel.addControl(button);
+  //   button.onPointerUpObservable.add(() =>{
+  //   panel.isVertical = !panel.isVertical;
+  //   });
+
+  //   const text = new GUI.TextBlock();
+  //   text.text = "*";
+  //   text.fontSize = 54;
+  //   text.color = "red";
+  //   button.content = text;
+    
+  // }
+  // addButton();
+  // addButton();
+  // addButton();
+  // }
+
+//guiButton();
 buildCapsule();
-createTorus();
 lightSpheres();
 buildTown();   
 buildGround();
